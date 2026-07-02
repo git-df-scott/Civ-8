@@ -1,0 +1,17 @@
+{
+  "name": "@civ8/engine",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The deterministic Civilization VIII simulation core. Pure TypeScript, zero runtime dependencies, no DOM.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

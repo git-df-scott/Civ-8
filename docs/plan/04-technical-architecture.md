@@ -127,9 +127,11 @@ branded IDs; collections behind a `SortedMap` wrapper guaranteeing
 ascending-ID iteration (killing the #1 nondeterminism source).
 
 All game quantities are **scaled integers** (movement in sixtieths, yields
-×100). No floats in rules code — lint-enforced. Floats are allowed only in AI
-*scoring*, which never feeds state (only command selection, itself
-deterministic: deterministic inputs, ties broken by lowest ID).
+×100). No floats in rules code — enforced by review convention now, and by a
+`rules/`-scoped float-literal lint heuristic once `rules/` lands at M1.
+Floats are allowed only in AI *scoring*, which never feeds state (only
+command selection, itself deterministic: deterministic inputs, ties broken
+by lowest ID).
 
 Derived caches (visibility counts, yield caches) are rebuildable, never
 serialized, recomputed on load — never sources of truth.

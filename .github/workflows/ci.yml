@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        # version comes from the "packageManager" field in package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Dependency boundaries (dependency-cruiser)
+        run: pnpm depcruise
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Determinism double-run
+        run: |
+          pnpm --silent sim -- --seed 1 --max-turns 10 > /tmp/sim-run-a.json
+          pnpm --silent sim -- --seed 1 --max-turns 10 > /tmp/sim-run-b.json
+          diff /tmp/sim-run-a.json /tmp/sim-run-b.json
+          echo "Determinism double-run: outputs identical."
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright browsers (cache miss)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        working-directory: apps/game
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright system deps (cache hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        working-directory: apps/game
+        run: npx playwright install-deps chromium
+
+      - name: Playwright smoke test
+        run: pnpm --filter @civ8/game run test:e2e
+
+      - name: Upload Playwright screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-screenshots
+          path: |
+            apps/game/test-results/**
+            apps/game/playwright-report/**
+          if-no-files-found: warn

@@ -1,0 +1,19 @@
+{
+  "name": "@civ8/ai",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "AI players: strategic/operational/tactical layers over PlayerView. M0 placeholder.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@civ8/engine": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.3"
+  }
+}

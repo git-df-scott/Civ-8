@@ -1,0 +1,31 @@
+{
+  "name": "civ8",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "ci": "pnpm typecheck && pnpm lint && pnpm depcruise && pnpm test && pnpm determinism",
+    "determinism": "bash -c 'pnpm --silent sim -- --seed 1 --max-turns 10 > /tmp/civ8-determinism-a.json && pnpm --silent sim -- --seed 1 --max-turns 10 > /tmp/civ8-determinism-b.json && diff /tmp/civ8-determinism-a.json /tmp/civ8-determinism-b.json && echo \"determinism double-run: outputs identical\"'",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint .",
+    "depcruise": "depcruise packages apps --config .dependency-cruiser.cjs",
+    "test": "vitest run",
+    "sim": "pnpm --silent --filter @civ8/cli run --silent sim",
+    "e2e": "pnpm --filter @civ8/game run test:e2e",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "dependency-cruiser": "^16.10.4",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.4",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.62.1",
+    "vitest": "^3.2.6"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@civ8/content",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Content schemas and the base-game content pack. M0 placeholder.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.3"
+  }
+}
