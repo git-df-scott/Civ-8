@@ -64,8 +64,9 @@ concrete acceptance criteria.
    acceptance-tested (doc 05).
 2. From there, the milestone ladder in order, each gated on its acceptance
    criteria and doc 06 §5's Definition of Done.
-3. Standing cadence: every PR runs the determinism double-run and 5-seed AI
-   gate; nightly tournaments guard balance bands from M7.
+3. Standing cadence: every PR runs the determinism double-run (from M0) and
+   the 5-seed AI gate (from M5); nightly tournaments track balance bands from
+   M7 and block merges on them from M12.
 
 ## Open items for the owner (none blocking)
 

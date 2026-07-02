@@ -78,17 +78,20 @@ or the weights are wrong.
 
 ## 6. The harness: AI-vs-AI as the balance instrument
 
-The single most important tool in the project (built at roadmap M5, used
-forever):
+The single most important tool in the project (first full AI-vs-AI games at
+roadmap M5, matured into the nightly tournament at M7, used forever):
 
 - Headless runner plays N full AI-vs-AI games from seed lists at high speed
   (no rendering; deterministic core), emitting structured telemetry per game:
   winner, victory type, turn counts, yield curves, war outcomes, era timing.
-- **Nightly CI sweep** (hundreds of games) guards balance invariants:
+- **Nightly CI sweep** (200 games, sharded across parallel jobs; per-civ
+  bands judged on rolling multi-night windows — doc 06 §3) guards balance
+  invariants:
   - every victory type wins within a target share band on standard settings;
   - no civ's win rate leaves its band;
   - median victory turn stays inside the pacing window;
-  - skill ladder sanity: higher decision-budget AI beats lower ≥ X% of games.
+  - skill ladder sanity: higher decision-budget AI beats the tier below it in
+    ≥65% of games.
 - Every rules/data PR ships with a harness delta report. Balance discussions
   happen over distributions, not vibes.
 - The same harness replays saved command logs bit-for-bit as the determinism

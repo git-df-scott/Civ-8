@@ -19,8 +19,9 @@ decomposes into measurable commitments the roadmap is built around:
 
 1. **Completion rate.** In genre telemetry, most 4X games are quit before any
    victory screen. Target: a majority of started standard-length games reach
-   an ending. Everything in the design that fights the late-game slog serves
-   this number.
+   an ending — measured in instrumented playtest builds until (and unless) a
+   wider player base exists. Everything in the design that fights the
+   late-game slog serves this number.
 2. **AI that plays the real game.** On the default difficulty the AI receives
    *zero* yield cheats — it wins or loses with the same rules, information
    asymmetries excepted, as the player. Measured continuously by the headless
@@ -45,7 +46,7 @@ decomposes into measurable commitments the roadmap is built around:
 | Civilization VI | Unstacked cities, district adjacency puzzle, Gathering Storm's living world | Snowballing; weak AI; eureka checklist-gaming; late-game slog |
 | Civilization VII | Era crises as pacing device, commander-based armies, navigable rivers | Forced civ-switching (breaks the fantasy); era hard-resets that discard player investment |
 | Humankind | Ambition of era transitions, terrain-integrated districts | Culture-switching identity mush; poor system legibility |
-| Old World | The orders economy (the single best pacing fix in the genre), characters with agency, undo | Full dynasty simulation is out of scope for v1; single-era setting |
+| Old World | The orders economy (the single best pacing fix in the genre), characters with agency, undo | Single-era scope trades away the full-history sweep; character layer's overhead isn't for everyone |
 | Ara: History Untold | Simultaneous turn ambition, crafting depth | Simultaneity's readability cost in single-player |
 
 ## The five chronic problems — and our answers

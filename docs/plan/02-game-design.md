@@ -24,8 +24,9 @@ The loop at three scales:
 
 ### 2.1 Map
 
-- **Hex grid**, cylindrical wrap east-west, pole caps. Sizes: Duel (56×36)
-  through Huge (128×80).
+- **Hex grid**, cylindrical wrap east-west, pole caps. Sizes and default
+  player counts: Duel (56×36, 2), Small (72×46, 4), Standard (92×60, 6),
+  Large (110×70, 8), Huge (128×80, 10).
 - **Terrain** is layered: base (grassland, plains, desert, tundra, snow,
   coast, ocean) × relief (flat, hills, mountains) × feature (forest, jungle,
   marsh, reef, oasis, floodplain) × resource.
@@ -95,6 +96,8 @@ The single most important economic system in the game.
   scales — but never as fast as a sprawling empire's surface area. A
   20-city empire runs on policies plus a few sharp interventions per turn;
   that is the *intended* play pattern, and it keeps time-to-decision flat.
+- Unspent Governance **banks, capped at 2× per-turn income** — quiet turns
+  fund decisive ones; it never converts to or from any other yield.
 - Difficulty knob: none. Governance is identical for AI and human.
 
 ### 3.5 Stability
@@ -103,6 +106,17 @@ Local (per-city) stability from amenities, culture, garrisons, distance, and
 war-weariness. Low stability → unrest → revolts that can flip cities to a
 rival or spawn **Free Peoples** (independent factions, §9). Stability is the
 brake on conquest sprees: taking cities is easy, *keeping* them is the game.
+
+### 3.6 Works & improvements
+
+Rural tiles are improved (farms, mines, pastures, quarries, fishing boats,
+roads) by each city's **Works queue**, not by builder units. The queue is
+policy-driven — the city improves its worked tiles according to its stance —
+and pinning a specific improvement on a specific tile is a Governance
+intervention. Work rates scale with population and tech. Pillaged
+improvements are repaired by the same queue at priority. Roads form
+automatically along established trade routes and army supply lines and can be
+pinned deliberately. No builder-unit micromanagement, ever (Pillar 2).
 
 ## 4. Time: eras and Turning Points
 
@@ -113,9 +127,9 @@ post-launch content space).
 - Era advance is **per-civ** (by tech/civic thresholds), but each era has a
   **world clock**: when enough civs (or the turn count) cross it, a global
   **Turning Point** resolves.
-- A Turning Point is a designed world event with teeth: the Bronze Age
-  Collapse, the Plague, the Reformation, Revolutions, the World Wars sequence,
-  the Information Revolution. Each one:
+- A Turning Point is a designed world event with teeth — one per era
+  transition, five in all: the Bronze Age Collapse, the Plague, the
+  Reformation, the Revolutions, and the World Crisis. Each one:
   - hits **leaders harder than laggards** (plague spreads along the trade
     routes the leader is rich with; revolutions target the biggest empires'
     stability) — this is the honest catch-up mechanic;
@@ -257,7 +271,7 @@ most dramatic — by construction, for every player at the table.
   Harbors claim adjacent ocean tiles"), never just +X%.
 - Civ design is **pure data + scripted hooks** (doc 04), so the roster grows
   cheaply and modders can add civs without touching engine code.
-- **Vertical-slice roster** (roadmap M4): Rome, Egypt, Mongolia, Korea —
+- **Vertical-slice roster** (roadmap M5–M7): Rome, Egypt, Mongolia, Korea —
   covering wide-military, wonder-tall, cavalry-aggression, and science-tall
   archetypes for balance testing.
 
@@ -278,3 +292,19 @@ Networked multiplayer (hot-seat ships; lockstep netcode is architecturally
 preserved — doc 04), the seventh era, full character/dynasty layer, map
 scripts beyond continents/pangaea/archipelago/fractal, scenario campaigns,
 and console/touch UI. Each has a reserved seam in the architecture.
+
+## 15. Edge rules (locked now so implementation never stalls)
+
+- **Commander death:** a formation whose commander dies fights on leaderless
+  with a combat and movement penalty until a new commander is assigned;
+  commanders are lost only when their formation is destroyed.
+- **Formation vs solo unit:** a solo unit fights as a one-unit formation on
+  the deployment ribbon — no special-case combat path exists.
+- **Capitals:** original capitals cannot be razed (Domination stays
+  well-defined); all other cities can be, with heavy stability and
+  diplomatic fallout.
+- **Simultaneous Final Acts:** multiple civs may be in their Final Act at
+  once; the first to complete its objective wins, and a same-turn tie
+  resolves by higher score.
+- **Decided games:** turn-cap Score wins count as decided games for the
+  balance bands in doc 06 §3, tracked as their own victory type.

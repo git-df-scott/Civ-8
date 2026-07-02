@@ -19,7 +19,7 @@ The full project plan lives in [`docs/plan/`](docs/plan/):
 | [02 — Game Design](docs/plan/02-game-design.md) | The full game design document: map, cities, combat, diplomacy, victory, everything |
 | [03 — AI Design](docs/plan/03-ai-design.md) | The AI as a headline feature: architecture, personalities, legibility |
 | [04 — Technical Architecture](docs/plan/04-technical-architecture.md) | Stack, deterministic sim core, rendering, save format, modding |
-| [05 — Roadmap](docs/plan/05-roadmap.md) | Milestones M0 → M12 with concrete acceptance criteria |
+| [05 — Roadmap](docs/plan/05-roadmap.md) | Milestones M0 → M13 with concrete acceptance criteria |
 | [06 — Quality, Balance & UX](docs/plan/06-quality.md) | Testing strategy, balance methodology, UX principles, risks |
 
 ## The one-paragraph pitch

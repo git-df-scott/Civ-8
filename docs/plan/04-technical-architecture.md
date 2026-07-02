@@ -21,7 +21,7 @@ against that engine.
 | Browser tests | Playwright (pre-installed Chromium) | Smoke tests, screenshot assertions, frame-time tracing |
 | Schema validation | Zod 4 (+ JSON Schema export) | One schema = runtime validation + inferred types + editor autocomplete for modders |
 | Lint/format | ESLint 9 + typescript-eslint + Prettier + **dependency-cruiser** | depcruise CI-enforces "engine imports nothing from pixi/react/dom" and "no cycles"; custom lint bans `Math.random`/`Date.now` in engine & AI |
-| CI | GitHub Actions | `ci.yml`: typecheck → lint → depcruise → unit → determinism double-run → headless AI matches → Playwright smoke. Nightly `balance.yml`: 100-seed tournaments |
+| CI | GitHub Actions | `ci.yml`: typecheck → lint → depcruise → unit → determinism double-run → headless AI matches → Playwright smoke. Nightly `balance-nightly.yml`: 200-game sharded tournaments |
 
 **Why PixiJS over raw Canvas2D:** a huge map is ~10k hex tiles with terrain,
 features, improvements, fog, borders, plus hundreds of sprites, and the core
@@ -37,7 +37,8 @@ pnpm monorepo. The dependency graph *is* the architecture, enforced by
 dependency-cruiser:
 
 ```
-engine  ← content-schemas          (engine depends on nothing else; zero DOM)
+engine  ← content/schemas          (type-only contract import; engine has
+                                    no runtime dependencies and zero DOM)
 ai      ← engine
 app     ← engine, ai, content, ui-components
 cli     ← engine, ai, content      (headless; no DOM)
@@ -242,8 +243,9 @@ Doc 03 owns the design (three utility-scored layers, weights in
   tags, so new content is automatically playable by the AI with zero AI code.
 - The harness (`cli sim`) runs seeds → JSON telemetry (winner, victory type,
   yield curves, decision logs with top-3 scored options); CI runs a 5-seed
-  crash/decisiveness/determinism gate per PR, nightly runs 100-seed
-  tournaments diffed against committed baseline bands (doc 06 §3).
+  crash/decisiveness/determinism gate per PR; nightly runs 200-game
+  tournaments sharded across parallel jobs, diffed against committed baseline
+  bands, with per-civ bands judged on rolling multi-night windows (doc 06 §3).
 
 ## 6. UI architecture
 
@@ -278,6 +280,10 @@ Two render domains, one data flow:
 | Mapgen, huge map | < 3s | bench fixture |
 | Save serialize / load+validate | < 500ms / < 2s | bench fixture |
 | Heap, mid-game | < 400MB | Playwright `page.metrics()` |
+| Full headless game (Standard map, 4 players, 330 turns) | median < 3 min | harness telemetry; keeps the sharded 200-game nightly under ~2h wall-clock |
+
+The **reference map** cited by milestone gates is the seeded Standard-size,
+6-player bench fixture (`bench.ts` scenario `ref-std-6`).
 
 Kept structurally: typed-array map state (no per-tile objects), chunk-baked
 terrain (pan cost ∝ visible chunks), zero per-frame allocation in the render

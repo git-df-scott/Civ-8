@@ -30,7 +30,9 @@ the standards.
 Colorblind-safe palettes with pattern redundancy on all map lenses; full
 keyboard navigation and remapping; UI scaling 100–200%; reduced-motion mode;
 captions/visual cues for all audio signals; dyslexia-friendly font option.
-Accessibility checks are part of each UI milestone's acceptance criteria.
+The full bar is enforced by M13's axe-core CI gate; UI built earlier must not
+preclude it — the keyboard focus model and colorblind-safe palette tokens are
+in place from the first HUD milestone (M4).
 
 ## 3. Balance methodology
 
@@ -40,6 +42,10 @@ Accessibility checks are part of each UI milestone's acceptance criteria.
   - each civ: 45–55% normalized win rate band;
   - median decided-game length: turns 240–300 of 330;
   - early elimination (before turn 120) under 10% of civs per game.
+
+  Turn-cap Score wins count as decided games (doc 02 §15). Bands are judged
+  on rolling multi-night windows (≥1,000 games) plus a weekly deep run — a
+  single 200-game nightly lacks the statistical power for per-civ bands.
 - **Pacing telemetry from human play**: instrumented builds record
   time-per-turn and interventions-per-turn distributions; the doc-01
   "time-to-decision stays flat" commitment is verified against real sessions
@@ -49,9 +55,11 @@ Accessibility checks are part of each UI milestone's acceptance criteria.
 
 ## 4. Playtesting cadence
 
-- Every milestone from M4 (vertical slice) ends with a **full-game playthrough
-  gate**: a complete game on the milestone's content must be played to an
-  ending, and its friction log triaged, before the milestone closes.
+- Every milestone from M5 (vertical slice) ends with a **full-game playthrough
+  gate**: a complete game on the milestone's content played to an ending and
+  its friction log triaged before the milestone closes. The owner plays these
+  when available; a reviewed AI self-play replay may substitute, except that
+  every victory type gets at least one human run before 1.0.
 - Self-play review: watch harness replays of AI-vs-AI games at milestone
   ends — replay files are cheap (command logs), and watching the AI play
   reveals both AI stupidity and rules degeneracy fast.
@@ -62,10 +70,12 @@ Accessibility checks are part of each UI milestone's acceptance criteria.
 
 A milestone is done only when: all acceptance criteria demonstrably pass;
 unit + determinism + golden-master suites green in CI; harness sweep shows no
-band regressions (from M5 on); performance budgets met on the reference map;
+band regressions (tracked from M7, merge-blocking from M12); performance
+budgets met on the reference map (the seeded Standard 6-player fixture,
+doc 04 §7);
 no known crash or save-corruption bugs; new systems have in-game tooltips and
 Civilopedia entries (docs are content, shipped with the feature); playthrough
-gate passed (from M4 on).
+gate passed (from M5 on).
 
 ## 6. Content quality bars
 
@@ -73,10 +83,14 @@ gate passed (from M4 on).
   flavor text meeting a house style guide (concise, historical, warm, no
   lorem-ipsum placeholders past the milestone that introduces the entity).
 - **Art:** placeholder-tiered pipeline — geometric placeholder → styled
-  final — tracked per asset class; no milestone after M8 ships new systems
-  on placeholder-tier art. Consistent readable style over fidelity.
-- **Audio:** UI feedback sounds from M8; era-layered music and ambient beds
-  by M11; all audio events data-driven.
+  final — tracked per asset class; from M12 on, new content ships on
+  styled-final art, and M13 retires every remaining placeholder-tier asset.
+  Consistent readable style over fidelity. Assets come from a scripted
+  generation pipeline (procedural/SVG spritesheets plus curated generated
+  art) with a per-milestone asset budget tracked alongside code.
+- **Audio:** all audio lands at M13 (the audio milestone in doc 05): UI
+  feedback cues, era-layered music, ambient beds — all data-driven via the
+  audio cue table.
 
 ## 7. Top design risks & mitigations
 
@@ -84,7 +98,7 @@ gate passed (from M4 on).
 | --- | --- |
 | Governance feels like a leash, not a liberation | Tune free-policy competence first (automation must be *good*); Governance costs only on interventions that were chores; vertical-slice playtest gate specifically probes this |
 | Turning Points feel like scripted punishment | Always choice-driven responses; hit-the-leader logic transparent; can be disabled per-game-setup for purists |
-| Formations flatten tactical variety | Deployment ribbon depth budget reviewed at M6 with dedicated combat playtests; solo-unit skirmish layer preserved |
+| Formations flatten tactical variety | Deployment ribbon depth budget reviewed at M8 with dedicated combat playtests; solo-unit skirmish layer preserved |
 | Living victory tracks make the leader a permanent pile-on target | Final Act counterplay is bounded and priced; leader gets defensive tools; harness watches comeback and hold rates |
 | Scope: this GDD is enormous | Doc 05's strict milestone gating; every system has a minimum-lovable version defined at its milestone; content roster scales down before systems get cut |
 | Solo-developed balance blind spots | The harness substitutes volume for staff; seeds shared for reproducible bug reports; mod-friendly data invites external iteration |
