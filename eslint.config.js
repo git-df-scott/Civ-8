@@ -38,6 +38,24 @@ export default tseslint.config(
             'Raw Object.keys iteration order is insertion-dependent. Use sortedKeys() (serialize/canonical) — the only sanctioned door (doc 04 §3.3).',
         },
         {
+          object: 'Object',
+          property: 'getOwnPropertyNames',
+          message:
+            'Raw Object.getOwnPropertyNames iteration order is insertion-dependent. Use sortedKeys() (serialize/canonical) — the only sanctioned door (doc 04 §3.3).',
+        },
+        {
+          object: 'Object',
+          property: 'entries',
+          message:
+            'Raw Object.entries iteration order is insertion-dependent. Use sortedKeys() (serialize/canonical) — the only sanctioned door (doc 04 §3.3).',
+        },
+        {
+          object: 'Reflect',
+          property: 'ownKeys',
+          message:
+            'Raw Reflect.ownKeys iteration order is insertion-dependent. Use sortedKeys() (serialize/canonical) — the only sanctioned door (doc 04 §3.3).',
+        },
+        {
           object: 'Math',
           property: 'random',
           message: 'Nondeterministic. Use the engine PCG32 RNG (rng/pcg32) substreams.',

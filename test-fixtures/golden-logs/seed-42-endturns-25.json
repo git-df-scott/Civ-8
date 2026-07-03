@@ -1,0 +1,108 @@
+{
+  "description": "seed 42, 25 EndTurns",
+  "seed": 42,
+  "commandLog": [
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    }
+  ],
+  "expectedTurnHashes": [
+    "f8cded62063a4245",
+    "70519e4667b5ccec",
+    "531deaa05ab104e1",
+    "73961e233c4ad1c2",
+    "66f95ee9b520590a",
+    "b1509c0382c05c4f",
+    "5aa0bb21ffa1cfe9",
+    "5abe29bf0678ef81",
+    "0e0245a103a95715",
+    "3caa2bb300601baa",
+    "dae47fb5621951ed",
+    "c5b6115ddafc0ba1",
+    "d763ff4179454d99",
+    "fa39de8963341ae4",
+    "8a05525c46beb7c1",
+    "da6cc0a4e6906684",
+    "c52cff59bcb1b937",
+    "13638a0816601738",
+    "d6741bd489f3a78f",
+    "ac83dc29bdb12e1a",
+    "840409a77fbc7f76",
+    "60536faa4a2f9c5e",
+    "41952108d19acd1d",
+    "a3cebe57c5e2b959",
+    "9c474fa4cf169d23"
+  ]
+}

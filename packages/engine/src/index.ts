@@ -1,130 +1,62 @@
 /**
  * @civ8/engine — the deterministic Civilization VIII simulation core.
  *
- * M0 walking skeleton: a `Game` facade with a single `EndTurn` command.
- * Everything observable is a function of `(seed, commandLog)`; the state hash
- * evolves every turn because `EndTurn` draws from the 'turn' RNG substream.
+ * M1: full GameState/Command/Event skeleton, command registry, RNG
+ * substreams, save/load with a migration framework (v0), and the shared
+ * turn-runner. Everything observable is a function of (seed, commandLog);
+ * see docs/determinism.md for the contract.
  */
 
-import { Pcg32, type Pcg32State } from './rng/pcg32';
-import { hashState } from './serialize/hash';
-
+// RNG
 export { Pcg32, fnv1a32, splitmix32, type Pcg32State } from './rng/pcg32';
+export { GameRng, type RngStreamStates } from './rng/gameRng';
+
+// Serialization & hashing
 export { canonicalStringify, sortedKeys } from './serialize/canonical';
 export { fnv1a64Hex, hashState } from './serialize/hash';
+export {
+  migrations,
+  migrateAndValidateSave,
+  SaveLoadError,
+  type SaveMigration,
+} from './serialize/migrations/index';
 
-// ---------------------------------------------------------------------------
-// Commands, events, results
-// ---------------------------------------------------------------------------
+// IDs & state
+// Raw-state plumbing (createInitialState, serializeGameState,
+// deserializeGameState, toCanonicalView) is deliberately NOT exported: the
+// Game facade is the single write entry point (doc 04 §3.2). Engine tests
+// import internals via relative src paths. SerializedState stays as a
+// type-only export — it is part of the SaveGame shape.
+export { playerId, type Branded, type PlayerId } from './ids';
+export { SortedMap } from './state/sortedMap';
+export {
+  DEFAULT_PLAYER_NAMES,
+  type GamePhase,
+  type GameState,
+  type Player,
+  type SerializedState,
+} from './state/gameState';
 
-export interface EndTurnCommand {
-  readonly type: 'EndTurn';
-}
+// Commands & events
+export type {
+  Command,
+  CommandHandler,
+  EndTurnCommand,
+  GameEvent,
+  Result,
+  RuleViolation,
+  TurnEndedEvent,
+} from './commands/types';
 
-/** M0: EndTurn is the only command. The union grows in M1+. */
-export type Command = EndTurnCommand;
+// Saves
+export {
+  CONTENT_HASH_PLACEHOLDER,
+  ENGINE_VERSION,
+  SAVE_VERSION,
+  type SaveGame,
+} from './save/saveGame';
+export { isKnownCommand, validateTurnHashes } from './save/validation';
 
-export interface TurnEndedEvent {
-  readonly type: 'TurnEnded';
-  readonly turn: number;
-}
-
-export type GameEvent = TurnEndedEvent;
-
-export interface RuleViolation {
-  readonly code: string;
-  readonly message: string;
-}
-
-export type Result<T, E> =
-  { readonly ok: true; readonly value: T } | { readonly ok: false; readonly error: E };
-
-// ---------------------------------------------------------------------------
-// State
-// ---------------------------------------------------------------------------
-
-/** Plain-data engine state. Everything here is canonically serializable. */
-export interface EngineState {
-  turn: number;
-  seed: number;
-  /** Serialized position of the 'turn' RNG substream. */
-  turnRng: Pcg32State;
-  /** Last value drawn from the 'turn' stream — makes per-turn drift visible. */
-  lastTurnDraw: number;
-}
-
-export const SAVE_VERSION = 0;
-
-export interface SaveGame {
-  readonly saveVersion: number;
-  readonly seed: number;
-  readonly snapshot: EngineState;
-}
-
-// ---------------------------------------------------------------------------
-// Game facade
-// ---------------------------------------------------------------------------
-
-export class Game {
-  private readonly state: EngineState;
-  private readonly turnStream: Pcg32;
-
-  private constructor(state: EngineState) {
-    this.state = state;
-    this.turnStream = Pcg32.fromState(state.turnRng);
-  }
-
-  static create(options: { seed: number }): Game {
-    const seed = options.seed >>> 0;
-    const turnStream = Pcg32.stream(seed, 'turn');
-    return new Game({
-      turn: 0,
-      seed,
-      turnRng: turnStream.getState(),
-      lastTurnDraw: 0,
-    });
-  }
-
-  /** The single write entry point (doc 04 §3.2). */
-  execute(cmd: Command): Result<GameEvent[], RuleViolation> {
-    if (cmd.type !== 'EndTurn') {
-      return {
-        ok: false,
-        error: {
-          code: 'UNKNOWN_COMMAND',
-          message: `Unknown command type: ${String((cmd as { type?: unknown }).type)}`,
-        },
-      };
-    }
-    this.state.lastTurnDraw = this.turnStream.nextUint32();
-    this.state.turn += 1;
-    return { ok: true, value: [{ type: 'TurnEnded', turn: this.state.turn }] };
-  }
-
-  get turn(): number {
-    return this.state.turn;
-  }
-
-  /**
-   * The live Pcg32 stream is the single source of truth for the RNG position;
-   * `state.turnRng` is refreshed from it only here, just before serialization.
-   */
-  private syncRngState(): void {
-    this.state.turnRng = this.turnStream.getState();
-  }
-
-  /** Canonical 64-bit FNV-1a hash of the full state. */
-  hash(): string {
-    this.syncRngState();
-    return hashState(this.state);
-  }
-
-  snapshot(): SaveGame {
-    this.syncRngState();
-    return {
-      saveVersion: SAVE_VERSION,
-      seed: this.state.seed,
-      snapshot: { ...this.state, turnRng: { ...this.state.turnRng } },
-    };
-  }
-}
+// Facade & turn-runner
+export { EngineInvariantError, Game } from './game';
+export { END_TURN, runEndTurns, type TurnRunReport } from './turnRunner';

@@ -1,15 +1,16 @@
 /**
- * sim — the headless determinism harness (M0 shape).
+ * sim — the headless determinism harness.
  *
- * Creates a Game from --seed, executes EndTurn --max-turns times, and prints
- * the per-turn hash chain plus the final hash as JSON on stdout. CI runs this
- * twice with the same seed and diffs the outputs (the determinism double-run).
+ * Creates a Game from --seed, executes EndTurn --max-turns times via the
+ * engine's shared turn-runner, and prints the per-EndTurn hash chain plus the
+ * final hash as JSON on stdout. CI runs this twice with the same seed and
+ * diffs the outputs (the determinism double-run).
  *
  * Usage: sim --seed 1 --max-turns 10
  */
 
 import process from 'node:process';
-import { Game } from '@civ8/engine';
+import { Game, runEndTurns } from '@civ8/engine';
 
 /** Seeds are 32-bit: anything larger would silently alias mod 2^32. */
 const MAX_SEED = 4294967295;
@@ -68,20 +69,13 @@ function fail(message: string): never {
 function main(): void {
   const { seed, maxTurns } = parseArgs(process.argv.slice(2));
   const game = Game.create({ seed });
-  const turnHashes: string[] = [];
-  for (let i = 0; i < maxTurns; i++) {
-    const result = game.execute({ type: 'EndTurn' });
-    if (!result.ok) {
-      fail(`turn ${i + 1} failed: ${result.error.code}: ${result.error.message}`);
-    }
-    turnHashes.push(game.hash());
-  }
+  const run = runEndTurns(game, maxTurns);
   const report = {
     seed,
     maxTurns,
     finalTurn: game.turn,
-    turnHashes,
-    finalHash: turnHashes[turnHashes.length - 1] ?? game.hash(),
+    turnHashes: run.turnHashes,
+    finalHash: run.finalHash,
   };
   process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
 }

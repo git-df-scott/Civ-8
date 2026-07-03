@@ -1,0 +1,48 @@
+{
+  "description": "seed 1, 10 EndTurns",
+  "seed": 1,
+  "commandLog": [
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    }
+  ],
+  "expectedTurnHashes": [
+    "bc8e8da96adf2831",
+    "faaca82788bdb945",
+    "ebc1fc2c92c6a4b2",
+    "cb4dd885e179487d",
+    "a357593ecdae0b33",
+    "8626247329aedc19",
+    "0129d9c6b227f356",
+    "080b82f27b6e1a1f",
+    "c31de11000500aa7",
+    "40d1c87c03d7fc93"
+  ]
+}

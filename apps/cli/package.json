@@ -6,7 +6,9 @@
   "description": "Headless runners: sim (AI-vs-AI + determinism harness), later replay/mapgen-preview/bench.",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "sim": "tsx src/sim.ts"
+    "sim": "tsx src/sim.ts",
+    "replay": "tsx src/replay.ts",
+    "goldens:update": "tsx src/goldens-update.ts"
   },
   "dependencies": {
     "@civ8/engine": "workspace:*"
@@ -14,6 +16,7 @@
   "devDependencies": {
     "@types/node": "^22.15.0",
     "tsx": "^4.19.0",
-    "typescript": "~5.8.3"
+    "typescript": "~5.8.3",
+    "vitest": "^3.2.6"
   }
 }
