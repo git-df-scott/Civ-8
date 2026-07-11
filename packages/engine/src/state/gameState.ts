@@ -9,7 +9,15 @@
  */
 
 import { playerId, type PlayerId } from '../ids';
-import type { RngStreamStates } from '../rng/gameRng';
+import type { GameRng, RngStreamStates } from '../rng/gameRng';
+import {
+  deserializeMapState,
+  serializeMapState,
+  type MapState,
+  type SerializedMapState,
+} from '../map/grid';
+import { generateMap } from '../map/mapgen/index';
+import type { MapSizeName } from '../map/sizes';
 import { sortedKeys } from '../serialize/canonical';
 import { SortedMap } from './sortedMap';
 
@@ -56,8 +64,10 @@ export interface GameState {
    */
   rng: RngStreamStates;
   players: SortedMap<PlayerId, Player>;
-  /** Placeholder until M2 mapgen lands (typed-array MapState). */
-  map: null;
+  /** The size preset the map was generated with — part of game genesis. */
+  mapSize: MapSizeName;
+  /** Typed-array tile storage (doc 04 §4). Mutated only by command handlers. */
+  map: MapState;
   /** Placeholder until M3 units land (SortedMap<UnitId, Unit>). */
   units: null;
   /** Placeholder until M4 cities land (SortedMap<CityId, City>). */
@@ -76,7 +86,9 @@ export interface SerializedState {
   rng: RngStreamStates;
   /** Ascending-ID [id, player] pairs (SortedMap serialized form). */
   players: Array<[number, Player]>;
-  map: null;
+  mapSize: MapSizeName;
+  /** Canonical map form: typed arrays → base64 (doc 04 §3.4). */
+  map: SerializedMapState;
   units: null;
   cities: null;
   nextIds: NextIds;
@@ -86,8 +98,12 @@ export interface SerializedState {
 /** M1 games are fixed two-seat games; real setup options arrive with mapgen. */
 export const DEFAULT_PLAYER_NAMES: readonly string[] = ['Player 1', 'Player 2'];
 
-/** The initial state is a pure function of the seed — replay depends on this. */
-export function createInitialState(seed: number): GameState {
+/**
+ * The initial state is a pure function of (seed, mapSize) — replay depends on
+ * this. Mapgen draws only from the `mapgen:<stage>` substreams of `rng`, so
+ * game creation never shifts any other stream (doc 04 §3.3).
+ */
+export function createInitialState(seed: number, rng: GameRng, mapSize: MapSizeName): GameState {
   const players = new SortedMap<PlayerId, Player>();
   let nextPlayer = 0;
   for (const name of DEFAULT_PLAYER_NAMES) {
@@ -95,14 +111,18 @@ export function createInitialState(seed: number): GameState {
     players.set(id, { id, name });
     nextPlayer += 1;
   }
+  // Generate the map BEFORE capturing rng state, so state.rng reflects the
+  // mapgen substream positions from the very first hash.
+  const map = generateMap(rng, mapSize);
   return {
     turn: 0,
     phase: 'playing',
     activePlayer: players.keys()[0] as PlayerId,
     seed: seed >>> 0,
-    rng: {},
+    rng: rng.getState(),
     players,
-    map: null,
+    mapSize,
+    map,
     units: null,
     cities: null,
     nextIds: { player: nextPlayer, unit: 0, city: 0 },
@@ -118,7 +138,8 @@ export function serializeGameState(state: GameState): SerializedState {
     seed: state.seed,
     rng: cloneRngStates(state.rng),
     players: state.players.toEntries().map(([id, player]) => [id, { ...player }]),
-    map: state.map,
+    mapSize: state.mapSize,
+    map: serializeMapState(state.map),
     units: state.units,
     cities: state.cities,
     nextIds: { ...state.nextIds },
@@ -142,7 +163,10 @@ export function toCanonicalView(state: GameState): SerializedState {
     seed: state.seed,
     rng: state.rng,
     players: state.players.toEntries(),
-    map: state.map,
+    mapSize: state.mapSize,
+    // Typed arrays must become plain data for canonicalStringify; the base64
+    // strings are fresh (unavoidable) but small (~5 bytes/tile pre-encoding).
+    map: serializeMapState(state.map),
     units: state.units,
     cities: state.cities,
     nextIds: state.nextIds,
@@ -163,7 +187,8 @@ export function deserializeGameState(serialized: SerializedState): GameState {
         { id: playerId(player.id), name: player.name },
       ]),
     ),
-    map: serialized.map,
+    mapSize: serialized.mapSize,
+    map: deserializeMapState(serialized.map),
     units: serialized.units,
     cities: serialized.cities,
     nextIds: { ...serialized.nextIds },

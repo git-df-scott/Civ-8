@@ -37,6 +37,65 @@ export {
   type SerializedState,
 } from './state/gameState';
 
+// Map: hex math, grid, sizes, terrain tables, mapgen
+export {
+  HEX_DIRECTION_COUNT,
+  HEX_DIR_Q,
+  HEX_DIR_R,
+  hexDistance,
+  hexLine,
+  neighborTile,
+  oppositeDirection,
+  tileCol,
+  tileIndex,
+  tileIndexOf,
+  tileRow,
+  wrapQ,
+  type TileIndex,
+} from './map/hex';
+export {
+  createMapState,
+  deserializeMapState,
+  mapNeighbor,
+  serializeMapState,
+  tileCount,
+  type MapState,
+  type SerializedMapState,
+} from './map/grid';
+export {
+  DEFAULT_MAP_SIZE,
+  isMapSizeName,
+  MAP_SIZE_NAMES,
+  MAP_SIZES,
+  type MapDimensions,
+  type MapSizeName,
+} from './map/sizes';
+export {
+  FEATURE,
+  FEATURE_COUNT,
+  HILLS_ELEVATION,
+  isWaterTerrain,
+  MOUNTAIN_ELEVATION,
+  RELIEF,
+  reliefOf,
+  RESOURCE,
+  RESOURCE_COUNT,
+  RESOURCE_SPECS,
+  TERRAIN,
+  TERRAIN_COUNT,
+  type FeatureId,
+  type ReliefId,
+  type ResourceId,
+  type ResourceSpec,
+  type TerrainId,
+} from './map/terrain';
+export {
+  computeDiagnostics,
+  generateMap,
+  MapgenValidationError,
+  type MapgenDiagnostics,
+} from './map/mapgen/index';
+
 // Commands & events
 export type {
   Command,

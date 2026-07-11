@@ -13,6 +13,9 @@ const useLocalChromium = !process.env.CI && fs.existsSync(localChromium);
 export default defineConfig({
   testDir: './e2e',
   timeout: 60_000,
+  // Serial: the pan-perf spec measures frame times and a parallel worker
+  // competing for CPU (software-GL rasterization) skews it into flakiness.
+  workers: 1,
   retries: process.env.CI ? 1 : 0,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {

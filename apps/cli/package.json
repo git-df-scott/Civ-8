@@ -3,18 +3,22 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Headless runners: sim (AI-vs-AI + determinism harness), later replay/mapgen-preview/bench.",
+  "description": "Headless runners: sim (AI-vs-AI + determinism harness), replay, mapgen-preview, bench.",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "sim": "tsx src/sim.ts",
     "replay": "tsx src/replay.ts",
+    "mapgen-preview": "tsx src/mapgen-preview.ts",
+    "bench": "tsx src/bench.ts",
     "goldens:update": "tsx src/goldens-update.ts"
   },
   "dependencies": {
-    "@civ8/engine": "workspace:*"
+    "@civ8/engine": "workspace:*",
+    "pngjs": "^7.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
+    "@types/pngjs": "^6.0.5",
     "tsx": "^4.19.0",
     "typescript": "~5.8.3",
     "vitest": "^3.2.6"

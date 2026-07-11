@@ -1,35 +1,61 @@
 /**
- * Save-migration framework v0 (doc 04 §3.4).
+ * Save-migration framework (doc 04 §3.4).
  *
  * `migrations[N]` upgrades a raw save from version N to N+1. Loading runs the
  * chain from the save's version up to SAVE_VERSION, then structurally
  * validates the result against the current schema. Validation is hand-rolled:
  * the engine has zero runtime dependencies, so no zod here (schema libraries
  * live at the app boundary, doc 04 §2).
- *
- * The array is empty at v0 — the first entry appears when SAVE_VERSION bumps
- * to 1 and a v0→v1 upgrade is written alongside it.
  */
 
 import type { Command } from '../../commands/types';
 import type { Player, SerializedState } from '../../state/gameState';
 import { CONTENT_HASH_PLACEHOLDER, SAVE_VERSION, type SaveGame } from '../../save/saveGame';
-import {
-  SaveLoadError,
-  fail,
-  isKnownCommand,
-  validateTurnHashes,
-} from '../../save/validation';
+import { SaveLoadError, fail, isKnownCommand, validateTurnHashes } from '../../save/validation';
 import { sortedKeys } from '../canonical';
 import type { Pcg32State } from '../../rng/pcg32';
-import type { RngStreamStates } from '../../rng/gameRng';
+import { GameRng, type RngStreamStates } from '../../rng/gameRng';
+import { serializeMapState, type SerializedMapState } from '../../map/grid';
+import { generateMap } from '../../map/mapgen/index';
+import { DEFAULT_MAP_SIZE, isMapSizeName, MAP_SIZES, type MapSizeName } from '../../map/sizes';
+import { FEATURE_COUNT, RESOURCE_COUNT, TERRAIN_COUNT } from '../../map/terrain';
+import { base64ToBytes } from '../base64';
 
 export { SaveLoadError } from '../../save/validation';
 
 export type SaveMigration = (raw: unknown) => unknown;
 
-/** Index N migrates saveVersion N → N+1. Empty at v0. */
-export const migrations: readonly SaveMigration[] = [];
+/**
+ * v0 → v1 (M2): v0 saves predate the map. Because the map is a pure function
+ * of (seed, mapSize) drawn only from the `mapgen:*` substreams, the exact map
+ * a v1 engine would have generated at creation is reconstructible: generate
+ * it from the save's seed at the v0 default size (Duel — v0 had no size
+ * option) and merge the touched mapgen substream positions into the
+ * snapshot's rng record. The result is byte-for-byte the state a v1
+ * `Game.replay(seed, commandLog)` produces. `turnHashes` are kept verbatim:
+ * they are v0-era hashes, and command logs are only guaranteed replayable
+ * within a saveVersion (doc 04 §3.4) — the snapshot is the load path.
+ */
+function migrateV0ToV1(raw: unknown): unknown {
+  const save = asRecord(raw, 'save');
+  const snapshot = asRecord(save['snapshot'], 'save.snapshot');
+  const seed = asUint32(snapshot['seed'], 'save.snapshot.seed');
+  const rng = new GameRng(seed);
+  const map = generateMap(rng, DEFAULT_MAP_SIZE);
+  const oldRng = asRecord(snapshot['rng'], 'save.snapshot.rng');
+  return {
+    ...save,
+    snapshot: {
+      ...snapshot,
+      mapSize: DEFAULT_MAP_SIZE,
+      map: serializeMapState(map),
+      rng: { ...oldRng, ...rng.getState() },
+    },
+  };
+}
+
+/** Index N migrates saveVersion N → N+1. */
+export const migrations: readonly SaveMigration[] = [migrateV0ToV1];
 
 // ---------------------------------------------------------------------------
 // Structural validation helpers
@@ -88,9 +114,7 @@ function validateRngStates(value: unknown, path: string): RngStreamStates {
   // hazard exists at every later assignment site (GameRng.getState, clone).
   // No legitimate engine stream is ever named '__proto__'.
   if (Object.prototype.hasOwnProperty.call(record, '__proto__')) {
-    throw new SaveLoadError(
-      `Invalid save: forbidden RNG stream name "__proto__" at "${path}"`,
-    );
+    throw new SaveLoadError(`Invalid save: forbidden RNG stream name "__proto__" at "${path}"`);
   }
   // Accumulate on a null-prototype object so no key can collide with
   // Object.prototype accessors, then copy to a plain object (object spread
@@ -100,6 +124,53 @@ function validateRngStates(value: unknown, path: string): RngStreamStates {
     states[name] = validatePcg32State(record[name], `${path}.${name}`);
   }
   return { ...states };
+}
+
+/** Decodes a base64 tile field and checks length and per-byte value bounds. */
+function validateTileField(value: unknown, path: string, tiles: number, maxValue: number): string {
+  const text = asString(value, path);
+  let bytes: Uint8Array;
+  try {
+    bytes = base64ToBytes(text);
+  } catch (cause) {
+    throw new SaveLoadError(
+      `Invalid save: malformed base64 at "${path}": ${cause instanceof Error ? cause.message : String(cause)}`,
+    );
+  }
+  if (bytes.length !== tiles) {
+    throw new SaveLoadError(
+      `Invalid save: "${path}" decodes to ${bytes.length} bytes, expected ${tiles}`,
+    );
+  }
+  for (let i = 0; i < bytes.length; i++) {
+    if ((bytes[i] as number) > maxValue) {
+      throw new SaveLoadError(`Invalid save: "${path}" byte ${i} is ${bytes[i]}, max ${maxValue}`);
+    }
+  }
+  return text;
+}
+
+function validateMap(value: unknown, mapSize: MapSizeName, path: string): SerializedMapState {
+  const record = asRecord(value, path);
+  const width = asInt(record['width'], `${path}.width`);
+  const height = asInt(record['height'], `${path}.height`);
+  const expected = MAP_SIZES[mapSize];
+  if (width !== expected.width || height !== expected.height) {
+    throw new SaveLoadError(
+      `Invalid save: map is ${width}x${height} but mapSize "${mapSize}" is ` +
+        `${expected.width}x${expected.height}`,
+    );
+  }
+  const tiles = width * height;
+  return {
+    width,
+    height,
+    terrain: validateTileField(record['terrain'], `${path}.terrain`, tiles, TERRAIN_COUNT - 1),
+    elevation: validateTileField(record['elevation'], `${path}.elevation`, tiles, 255),
+    feature: validateTileField(record['feature'], `${path}.feature`, tiles, FEATURE_COUNT - 1),
+    resource: validateTileField(record['resource'], `${path}.resource`, tiles, RESOURCE_COUNT - 1),
+    riverEdges: validateTileField(record['riverEdges'], `${path}.riverEdges`, tiles, 0x3f),
+  };
 }
 
 function validatePlayers(value: unknown, path: string): Array<[number, Player]> {
@@ -143,6 +214,10 @@ function validateSnapshot(value: unknown, path: string): SerializedState {
         `a member of "${path}.players"`,
     );
   }
+  const mapSize = asString(record['mapSize'], `${path}.mapSize`);
+  if (!isMapSizeName(mapSize)) {
+    fail(`${path}.mapSize`, 'a known map size name', mapSize);
+  }
   return {
     turn: asInt(record['turn'], `${path}.turn`),
     phase,
@@ -150,7 +225,8 @@ function validateSnapshot(value: unknown, path: string): SerializedState {
     seed: asUint32(record['seed'], `${path}.seed`),
     rng: validateRngStates(record['rng'], `${path}.rng`),
     players,
-    map: asNull(record['map'], `${path}.map`),
+    mapSize,
+    map: validateMap(record['map'], mapSize, `${path}.map`),
     units: asNull(record['units'], `${path}.units`),
     cities: asNull(record['cities'], `${path}.cities`),
     nextIds: {

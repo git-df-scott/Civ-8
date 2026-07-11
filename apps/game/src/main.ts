@@ -1,26 +1,56 @@
 /**
- * M0 "hello hexagon": a PixiJS 8 Application drawing one pointy-top hexagon.
- * The real layered map renderer arrives in M2 (doc 04 §6).
+ * M2 boot: a new game generates a map from the URL seed and renders it with
+ * the chunked terrain layer + pan/zoom camera (doc 04 §6).
+ *
+ *   ?seed=<uint32>  — mapgen seed (default 7, fixed for reproducible smokes)
+ *   ?size=<name>    — duel | small | standard | large | huge (default standard)
+ *
+ * The render loop allocates nothing per frame: camera update/apply and chunk
+ * culling are scalar math over preallocated state.
  */
 
-import { Application, Graphics } from 'pixi.js';
+import { Application, Container } from 'pixi.js';
+import { Game, isMapSizeName, type MapSizeName } from '@civ8/engine';
+import { Camera } from './render/camera';
+import { mapPixelHeight, mapPixelWidth } from './render/hexGeometry';
+import { TerrainLayer } from './render/terrainLayer';
 
-/** Vertices of a pointy-top hexagon (Red Blob convention: corners at 60°·i − 30°). */
-function pointyHexagon(cx: number, cy: number, size: number): number[] {
-  const points: number[] = [];
-  for (let i = 0; i < 6; i++) {
-    const angle = (Math.PI / 180) * (60 * i - 30);
-    points.push(cx + size * Math.cos(angle), cy + size * Math.sin(angle));
-  }
-  return points;
+const DEFAULT_SEED = 7;
+const DEFAULT_SIZE: MapSizeName = 'standard';
+
+function readParams(): { seed: number; size: MapSizeName } {
+  const params = new URLSearchParams(window.location.search);
+  const rawSeed = params.get('seed');
+  const parsed = rawSeed === null ? Number.NaN : Number(rawSeed);
+  const seed =
+    Number.isInteger(parsed) && parsed >= 0 && parsed <= 0xffffffff ? parsed : DEFAULT_SEED;
+  const rawSize = params.get('size');
+  const size = rawSize !== null && isMapSizeName(rawSize) ? rawSize : DEFAULT_SIZE;
+  return { seed, size };
+}
+
+/** Test hook surface for Playwright (map smoke + pan-perf specs). */
+interface Civ8TestHooks {
+  readonly game: Game;
+  readonly camera: Camera;
+  readonly terrain: TerrainLayer;
+  readonly app: Application;
 }
 
 async function main(): Promise<void> {
+  const { seed, size } = readParams();
+  const game = Game.create({ seed, mapSize: size });
+  const map = game.map;
+
   const app = new Application();
   await app.init({
-    background: '#10141d',
+    background: '#0a0e16',
     resizeTo: window,
-    antialias: true,
+    // Full-screen MSAA is ruinously slow on software WebGL (headless CI) and
+    // buys little here: terrain chunks are baked into antialiased
+    // RenderTextures (terrainLayer.ts), so edges stay smooth without paying
+    // for MSAA on every composited frame.
+    antialias: false,
   });
 
   const root = document.getElementById('app');
@@ -29,24 +59,33 @@ async function main(): Promise<void> {
   }
   root.appendChild(app.canvas);
 
-  const hex = new Graphics();
+  const world = new Container();
+  app.stage.addChild(world);
 
-  const draw = (): void => {
-    const cx = app.screen.width / 2;
-    const cy = app.screen.height / 2;
-    const size = Math.min(app.screen.width, app.screen.height) * 0.3;
-    hex
-      .clear()
-      .poly(pointyHexagon(cx, cy, size))
-      .fill(0x3f9e6b)
-      .stroke({ width: 6, color: 0xe8ecf1, join: 'round' });
-  };
+  const terrain = new TerrainLayer(map, app.renderer);
+  world.addChild(terrain.container);
 
-  draw();
-  app.renderer.on('resize', draw);
-  app.stage.addChild(hex);
+  const worldWidth = mapPixelWidth(map.width);
+  const worldHeight = mapPixelHeight(map.height);
+  const camera = new Camera({ worldWidth, worldHeight, minScale: 0.12, maxScale: 2.5 });
+  camera.attach(app.canvas);
+  // Boot framing: the whole map roughly in view, centered.
+  camera.setScale(
+    Math.max(0.12, Math.min(app.screen.width / worldWidth, app.screen.height / worldHeight)),
+  );
+  camera.centerOn(worldWidth / 2, worldHeight / 2);
 
-  // Signal for the Playwright smoke test: the first frame has been set up.
+  app.ticker.add((ticker) => {
+    camera.update(ticker.deltaMS, app.screen.width, app.screen.height);
+    camera.apply(world);
+    terrain.update();
+    terrain.cull(camera.viewLeft, camera.viewTop, camera.viewRight, camera.viewBottom);
+  });
+
+  // Test hooks (harmless in production; typed, not `any`).
+  (window as unknown as { __civ8: Civ8TestHooks }).__civ8 = { game, camera, terrain, app };
+
+  // Signal for the Playwright smoke tests: first frame is set up.
   document.body.dataset['ready'] = '1';
 }
 

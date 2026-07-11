@@ -3,7 +3,12 @@ import { describe, expect, it } from 'vitest';
 import { Game, runEndTurns } from '../src/index';
 
 const seedArb = fc.integer({ min: 0, max: 0xffffffff });
-const turnsArb = fc.integer({ min: 0, max: 50 });
+// Since M2 every Game.create runs full duel mapgen and every EndTurn hashes
+// the map, so a run is ~20× costlier than in M1. The determinism signal is
+// per-run (seed coverage), not per-turn: fewer turns, explicit timeouts,
+// same 500-seed coverage. These runs also fuzz mapgen's validation stage
+// across 500 random seeds for free.
+const turnsArb = fc.integer({ min: 0, max: 20 });
 
 describe('replay identity (property)', () => {
   it('two fresh runs of (seed, N EndTurns) produce identical hash chains [500 runs]', () => {
@@ -16,7 +21,7 @@ describe('replay identity (property)', () => {
       }),
       { numRuns: 500 },
     );
-  });
+  }, 120_000);
 
   it('Game.replay(seed, commandLog) reproduces the recorded hash chain [500 runs]', () => {
     fc.assert(
@@ -30,5 +35,5 @@ describe('replay identity (property)', () => {
       }),
       { numRuns: 500 },
     );
-  });
+  }, 120_000);
 });

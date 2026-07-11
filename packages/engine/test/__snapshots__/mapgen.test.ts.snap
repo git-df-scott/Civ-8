@@ -1,0 +1,43 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`mapgen per-stage snapshots (3 seeds) > seed 1 (duel) stage hashes are stable 1`] = `
+{
+  "biomes": "6c1d1116cb1f0731",
+  "climateMoisture": "600e94e53f6605b9",
+  "climateTemperature": "175f14fc10521380",
+  "elevation": "57dcc06280683baa",
+  "features": "d83d15ece618523e",
+  "landmass": "47800b920868567e",
+  "resources": "a8de8d37a4b24f65",
+  "riversEdges": "465c578c1ba87246",
+  "riversTerrain": "6c1d1116cb1f0731",
+}
+`;
+
+exports[`mapgen per-stage snapshots (3 seeds) > seed 7 (duel) stage hashes are stable 1`] = `
+{
+  "biomes": "e1b4e1b71cd1dcbe",
+  "climateMoisture": "25247870a0bb0d93",
+  "climateTemperature": "f04b1d712908497c",
+  "elevation": "3a5167d9ac48952a",
+  "features": "2c35fb28369c8e51",
+  "landmass": "303a4075f80bdfea",
+  "resources": "2457f31dfaa78502",
+  "riversEdges": "4522145ddf4f743b",
+  "riversTerrain": "e1b4e1b71cd1dcbe",
+}
+`;
+
+exports[`mapgen per-stage snapshots (3 seeds) > seed 42 (duel) stage hashes are stable 1`] = `
+{
+  "biomes": "d4d3d472392a609d",
+  "climateMoisture": "a9536ff6db5f062f",
+  "climateTemperature": "c59dc4736b608776",
+  "elevation": "af6c5eaa5564992e",
+  "features": "268b906f19a0995a",
+  "landmass": "83f68189d7b07391",
+  "resources": "e914d9abe6390490",
+  "riversEdges": "4dc6472ad8098e39",
+  "riversTerrain": "c9802c691950edd4",
+}
+`;

@@ -16,6 +16,8 @@
     "test": "vitest run",
     "sim": "pnpm --silent --filter @civ8/cli run --silent sim",
     "replay": "pnpm --silent --filter @civ8/cli run --silent replay",
+    "mapgen": "pnpm --silent --filter @civ8/cli run --silent mapgen-preview",
+    "bench": "pnpm --silent --filter @civ8/cli run --silent bench",
     "goldens:update": "pnpm --filter @civ8/cli run goldens:update",
     "e2e": "pnpm --filter @civ8/game run test:e2e",
     "format": "prettier --write ."

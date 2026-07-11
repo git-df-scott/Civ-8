@@ -10,6 +10,8 @@
 
 import { getCommandHandler } from './commands/registry';
 import type { Command, GameEvent, Result, RuleViolation } from './commands/types';
+import type { MapState } from './map/grid';
+import { DEFAULT_MAP_SIZE, type MapSizeName } from './map/sizes';
 import { GameRng } from './rng/gameRng';
 import {
   CONTENT_HASH_PLACEHOLDER,
@@ -59,9 +61,10 @@ export class Game {
     this.turnHashList = turnHashes;
   }
 
-  static create(options: { seed: number }): Game {
-    const state = createInitialState(options.seed);
-    return new Game(state, new GameRng(state.seed), [], []);
+  static create(options: { seed: number; mapSize?: MapSizeName }): Game {
+    const rng = new GameRng(options.seed >>> 0);
+    const state = createInitialState(options.seed, rng, options.mapSize ?? DEFAULT_MAP_SIZE);
+    return new Game(state, rng, [], []);
   }
 
   /**
@@ -82,8 +85,12 @@ export class Game {
    * command log. The result's hash chain must match the original's — replay
    * tests, golden logs, and desync forensics all rest on this.
    */
-  static replay(seed: number, commandLog: readonly Command[]): Game {
-    const game = Game.create({ seed });
+  static replay(
+    seed: number,
+    commandLog: readonly Command[],
+    options?: { mapSize?: MapSizeName },
+  ): Game {
+    const game = Game.create({ seed, mapSize: options?.mapSize ?? DEFAULT_MAP_SIZE });
     for (const [index, cmd] of commandLog.entries()) {
       const result = game.execute(cmd);
       if (!result.ok) {
@@ -143,6 +150,21 @@ export class Game {
 
   get activePlayer(): number {
     return this.state.activePlayer;
+  }
+
+  /** The size preset this game's map was generated with. */
+  get mapSize(): MapSizeName {
+    return this.state.mapSize;
+  }
+
+  /**
+   * Read-only view of the live map for renderers and tools (PlayerView with
+   * fog arrives in M3). Callers MUST NOT mutate the typed arrays — writes go
+   * through commands only.
+   */
+  get map(): MapState {
+    this.assertNotCorrupted();
+    return this.state.map;
   }
 
   /** The per-EndTurn hash chain recorded so far. */
