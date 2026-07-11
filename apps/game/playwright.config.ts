@@ -14,6 +14,10 @@ export default defineConfig({
   testDir: './e2e',
   timeout: 60_000,
   retries: process.env.CI ? 1 : 0,
+  // One worker: the pan-perf spec measures frame times, and a parallel
+  // worker competing for CPU (software rendering in CI/container) skews
+  // them straight into the dropped-frame budget.
+  workers: 1,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
     baseURL: 'http://127.0.0.1:5173',

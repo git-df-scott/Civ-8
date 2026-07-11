@@ -10,6 +10,7 @@
 
 import { getCommandHandler } from './commands/registry';
 import type { Command, GameEvent, Result, RuleViolation } from './commands/types';
+import type { MapSizeName, MapState } from './map/grid';
 import { GameRng } from './rng/gameRng';
 import {
   CONTENT_HASH_PLACEHOLDER,
@@ -20,12 +21,19 @@ import {
 import { migrateAndValidateSave } from './serialize/migrations/index';
 import { hashState } from './serialize/hash';
 import {
+  DEFAULT_MAP_SIZE,
   createInitialState,
   deserializeGameState,
   serializeGameState,
   toCanonicalView,
   type GameState,
 } from './state/gameState';
+
+/** Game-creation options. mapSize defaults to DEFAULT_MAP_SIZE ('standard'). */
+export interface CreateGameOptions {
+  readonly seed: number;
+  readonly mapSize?: MapSizeName;
+}
 
 /**
  * Thrown when an engine invariant is violated — e.g. a command handler's
@@ -59,9 +67,12 @@ export class Game {
     this.turnHashList = turnHashes;
   }
 
-  static create(options: { seed: number }): Game {
-    const state = createInitialState(options.seed);
-    return new Game(state, new GameRng(state.seed), [], []);
+  static create(options: CreateGameOptions): Game {
+    // createInitialState runs mapgen and captures the touched substream
+    // positions into state.rng; restoring from them (rather than a fresh
+    // GameRng) keeps live streams exactly where mapgen left them.
+    const state = createInitialState(options.seed, options.mapSize ?? DEFAULT_MAP_SIZE);
+    return new Game(state, GameRng.fromState(state.seed, state.rng), [], []);
   }
 
   /**
@@ -80,10 +91,16 @@ export class Game {
   /**
    * Verification path (doc 04 §3.4): re-derive a game from its seed and
    * command log. The result's hash chain must match the original's — replay
-   * tests, golden logs, and desync forensics all rest on this.
+   * tests, golden logs, and desync forensics all rest on this. Setup options
+   * beyond the seed (today: mapSize) must match the original game's;
+   * DEFAULT_MAP_SIZE is assumed when omitted.
    */
-  static replay(seed: number, commandLog: readonly Command[]): Game {
-    const game = Game.create({ seed });
+  static replay(
+    seed: number,
+    commandLog: readonly Command[],
+    options?: { readonly mapSize?: MapSizeName },
+  ): Game {
+    const game = Game.create({ seed, ...(options?.mapSize ? { mapSize: options.mapSize } : {}) });
     for (const [index, cmd] of commandLog.entries()) {
       const result = game.execute(cmd);
       if (!result.ok) {
@@ -143,6 +160,17 @@ export class Game {
 
   get activePlayer(): number {
     return this.state.activePlayer;
+  }
+
+  /**
+   * Read-only view of the world for the renderer and tools. Callers must
+   * never write through it — all mutation goes through execute(). The
+   * fog-filtered PlayerView (M3) replaces this as the UI/AI read surface;
+   * this getter will remain for trusted tooling (mapgen-preview, tests).
+   */
+  get map(): Readonly<MapState> {
+    this.assertNotCorrupted();
+    return this.state.map;
   }
 
   /** The per-EndTurn hash chain recorded so far. */

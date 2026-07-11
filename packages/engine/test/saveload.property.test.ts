@@ -9,7 +9,8 @@ describe('save/load transparency (property)', () => {
   it('N EndTurns, snapshot, load, M more on both: original and loaded stay identical [250 runs]', () => {
     fc.assert(
       fc.property(seedArb, turnsArb, turnsArb, (seed, before, after) => {
-        const original = Game.create({ seed });
+        // duel: smallest map — every Game.create runs full mapgen since M2.
+        const original = Game.create({ seed, mapSize: 'duel' });
         runEndTurns(original, before);
 
         // Round-trip through JSON: exactly what a real on-disk save sees.
@@ -25,5 +26,5 @@ describe('save/load transparency (property)', () => {
       }),
       { numRuns: 250 },
     );
-  });
+  }, 120_000);
 });

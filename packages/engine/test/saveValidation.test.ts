@@ -1,5 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { Game, SaveLoadError, isKnownCommand, runEndTurns, validateTurnHashes } from '../src/index';
+import {
+  ELEVATION_LAND_MIN,
+  Game,
+  RESOURCE,
+  SaveLoadError,
+  TERRAIN,
+  deserializeMapState,
+  isKnownCommand,
+  isWaterTerrain,
+  runEndTurns,
+  serializeMapState,
+  validateTurnHashes,
+  type SerializedMapState,
+} from '../src/index';
 
 /** A JSON-round-tripped save after `turns` EndTurns — a real on-disk shape. */
 function rawSave(seed: number, turns: number): Record<string, unknown> {
@@ -59,6 +72,44 @@ describe('save validation', () => {
     const loaded = Game.load(JSON.parse(JSON.stringify(game.snapshot())));
     expect(loaded.hash()).toBe(game.hash());
   });
+
+  it(
+    'a save with a resource placed on an ocean tile fails to load ' +
+      '(reuses mapgen semantic validation)',
+    () => {
+      const raw = rawSave(13, 0);
+      const snapshot = raw['snapshot'] as { map: SerializedMapState };
+      const map = deserializeMapState(snapshot.map);
+      const oceanIndex = map.terrain.findIndex((t) => t === TERRAIN.Ocean);
+      // Premise: a standard-size map has at least one true Ocean tile.
+      expect(oceanIndex).toBeGreaterThanOrEqual(0);
+      // Structurally this is a perfectly legal byte (a real resource id in
+      // range) — only mapgen's own placement-legality rule (every resource
+      // rule requires land) can catch it.
+      map.resource[oceanIndex] = RESOURCE.Wheat;
+      snapshot.map = serializeMapState(map);
+      expect(() => Game.load(raw)).toThrow(SaveLoadError);
+      expect(() => Game.load(raw)).toThrow(/resource/i);
+    },
+  );
+
+  it(
+    "a save with a land tile's elevation below the land minimum fails to load " +
+      '(reuses mapgen semantic validation)',
+    () => {
+      const raw = rawSave(13, 0);
+      const snapshot = raw['snapshot'] as { map: SerializedMapState };
+      const map = deserializeMapState(snapshot.map);
+      const landIndex = map.terrain.findIndex((t) => !isWaterTerrain(t));
+      expect(landIndex).toBeGreaterThanOrEqual(0);
+      // Still a structurally legal byte (0..255) — only mapgen's elevation
+      // bound check can catch it.
+      map.elevation[landIndex] = ELEVATION_LAND_MIN - 1;
+      snapshot.map = serializeMapState(map);
+      expect(() => Game.load(raw)).toThrow(SaveLoadError);
+      expect(() => Game.load(raw)).toThrow(/elevation/i);
+    },
+  );
 });
 
 describe('shared validation helpers (save/validation)', () => {

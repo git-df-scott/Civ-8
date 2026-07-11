@@ -40,6 +40,9 @@ jobs:
           diff /tmp/sim-run-a.json /tmp/sim-run-b.json
           echo "Determinism double-run: outputs identical."
 
+      - name: Benchmarks (budget gate, doc 04 §7)
+        run: pnpm bench
+
       - name: Cache Playwright browsers
         id: playwright-cache
         uses: actions/cache@v4
@@ -59,6 +62,21 @@ jobs:
 
       - name: Playwright smoke test
         run: pnpm --filter @civ8/game run test:e2e
+
+      # Runs AFTER the Playwright step: Playwright clears its outputDir
+      # (apps/game/test-results/) at the start of every test:e2e run, so a
+      # PNG written there earlier in the job would be silently deleted before
+      # the upload-artifact step ever ran. Ordering after Playwright — rather
+      # than writing outside test-results/ — keeps this artifact alongside
+      # the other test-results/** artifacts in the same upload step below.
+      - name: Mapgen preview PNG (artifact; byte-identical across runs)
+        run: |
+          mkdir -p apps/game/test-results
+          pnpm mapgen -- --seed 7 --size huge --out apps/game/test-results/map-seed7-huge.png \
+            | tee /tmp/mapgen-a.log
+          pnpm mapgen -- --seed 7 --size huge --out /tmp/map-seed7-huge-b.png | tee /tmp/mapgen-b.log
+          cmp apps/game/test-results/map-seed7-huge.png /tmp/map-seed7-huge-b.png
+          echo "mapgen PNG: byte-identical across runs."
 
       - name: Upload Playwright screenshots
         if: always()

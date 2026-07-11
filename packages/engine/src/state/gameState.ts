@@ -9,7 +9,15 @@
  */
 
 import { playerId, type PlayerId } from '../ids';
-import type { RngStreamStates } from '../rng/gameRng';
+import { GameRng, type RngStreamStates } from '../rng/gameRng';
+import {
+  deserializeMapState,
+  serializeMapState,
+  type MapSizeName,
+  type MapState,
+  type SerializedMapState,
+} from '../map/grid';
+import { runMapgen } from '../map/mapgen/index';
 import { sortedKeys } from '../serialize/canonical';
 import { SortedMap } from './sortedMap';
 
@@ -56,8 +64,8 @@ export interface GameState {
    */
   rng: RngStreamStates;
   players: SortedMap<PlayerId, Player>;
-  /** Placeholder until M2 mapgen lands (typed-array MapState). */
-  map: null;
+  /** The world (map/grid.ts): struct-of-typed-arrays tile storage. */
+  map: MapState;
   /** Placeholder until M3 units land (SortedMap<UnitId, Unit>). */
   units: null;
   /** Placeholder until M4 cities land (SortedMap<CityId, City>). */
@@ -76,18 +84,27 @@ export interface SerializedState {
   rng: RngStreamStates;
   /** Ascending-ID [id, player] pairs (SortedMap serialized form). */
   players: Array<[number, Player]>;
-  map: null;
+  /** Typed arrays → base64 (doc 04 §3.4). */
+  map: SerializedMapState;
   units: null;
   cities: null;
   nextIds: NextIds;
   lastTurnDraw: number;
 }
 
-/** M1 games are fixed two-seat games; real setup options arrive with mapgen. */
+/** Games are fixed two-seat games until real setup options arrive (M5). */
 export const DEFAULT_PLAYER_NAMES: readonly string[] = ['Player 1', 'Player 2'];
 
-/** The initial state is a pure function of the seed — replay depends on this. */
-export function createInitialState(seed: number): GameState {
+/** The map size games get when the caller does not choose one. */
+export const DEFAULT_MAP_SIZE: MapSizeName = 'standard';
+
+/**
+ * The initial state is a pure function of (seed, mapSize) — replay depends
+ * on this. Mapgen runs here, on a fresh GameRng for the seed; the touched
+ * `mapgen:*` substream positions are captured into state.rng so they
+ * serialize into saves exactly like every later stream.
+ */
+export function createInitialState(seed: number, mapSize: MapSizeName): GameState {
   const players = new SortedMap<PlayerId, Player>();
   let nextPlayer = 0;
   for (const name of DEFAULT_PLAYER_NAMES) {
@@ -95,14 +112,16 @@ export function createInitialState(seed: number): GameState {
     players.set(id, { id, name });
     nextPlayer += 1;
   }
+  const rng = new GameRng(seed >>> 0);
+  const map = runMapgen(rng, mapSize);
   return {
     turn: 0,
     phase: 'playing',
     activePlayer: players.keys()[0] as PlayerId,
     seed: seed >>> 0,
-    rng: {},
+    rng: rng.getState(),
     players,
-    map: null,
+    map,
     units: null,
     cities: null,
     nextIds: { player: nextPlayer, unit: 0, city: 0 },
@@ -118,12 +137,35 @@ export function serializeGameState(state: GameState): SerializedState {
     seed: state.seed,
     rng: cloneRngStates(state.rng),
     players: state.players.toEntries().map(([id, player]) => [id, { ...player }]),
-    map: state.map,
+    map: serializeMapState(state.map),
     units: state.units,
     cities: state.cities,
     nextIds: { ...state.nextIds },
     lastTurnDraw: state.lastTurnDraw,
   };
+}
+
+/**
+ * Per-map-object cache of the serialized (base64) map form, keyed by object
+ * identity via WeakMap. `state.map` is immutable after mapgen through M2 (no
+ * unit/city/tile-mutation commands exist yet), so `serializeMapState` — which
+ * allocates a fresh set of base64 strings, the most expensive part of the
+ * per-EndTurn hash path — only needs to run once per distinct MapState
+ * object, not once per `toCanonicalView` call. Keying on object identity
+ * (not a deep-equal check) is what makes this cheap AND automatically
+ * correct once M3+ starts assigning `state.map` a new object reference on
+ * mutation: the stale entry is simply never looked up again and the WeakMap
+ * lets it be collected, with no explicit invalidation logic needed here.
+ */
+const serializedMapCache = new WeakMap<MapState, SerializedMapState>();
+
+function cachedSerializeMapState(map: MapState): SerializedMapState {
+  let serialized = serializedMapCache.get(map);
+  if (serialized === undefined) {
+    serialized = serializeMapState(map);
+    serializedMapCache.set(map, serialized);
+  }
+  return serialized;
 }
 
 /**
@@ -142,7 +184,8 @@ export function toCanonicalView(state: GameState): SerializedState {
     seed: state.seed,
     rng: state.rng,
     players: state.players.toEntries(),
-    map: state.map,
+    // Cached by state.map object identity — see cachedSerializeMapState.
+    map: cachedSerializeMapState(state.map),
     units: state.units,
     cities: state.cities,
     nextIds: state.nextIds,
@@ -163,7 +206,7 @@ export function deserializeGameState(serialized: SerializedState): GameState {
         { id: playerId(player.id), name: player.name },
       ]),
     ),
-    map: serialized.map,
+    map: deserializeMapState(serialized.map),
     units: serialized.units,
     cities: serialized.cities,
     nextIds: { ...serialized.nextIds },

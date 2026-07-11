@@ -53,6 +53,35 @@ export function fnv1a64Hex(text: string): string {
   return hi.toString(16).padStart(8, '0') + lo.toString(16).padStart(8, '0');
 }
 
+/**
+ * 64-bit FNV-1a over raw bytes, same limb technique as fnv1a64Hex. Used to
+ * fingerprint typed-array payloads (per-stage mapgen snapshots, PNG buffers)
+ * without a string detour.
+ */
+export function fnv1a64HexBytes(bytes: Uint8Array): string {
+  let h0 = 0x2325;
+  let h1 = 0x8422;
+  let h2 = 0x9ce4;
+  let h3 = 0xcbf2;
+  for (let i = 0; i < bytes.length; i++) {
+    h0 ^= bytes[i] as number;
+    let t = h0 * 0x1b3;
+    const n0 = t & 0xffff;
+    t = h1 * 0x1b3 + (t >>> 16);
+    const n1 = t & 0xffff;
+    t = h2 * 0x1b3 + (h0 << 8) + (t >>> 16);
+    const n2 = t & 0xffff;
+    t = h3 * 0x1b3 + (h1 << 8) + (t >>> 16);
+    h0 = n0;
+    h1 = n1;
+    h2 = n2;
+    h3 = t & 0xffff;
+  }
+  const hi = ((h3 << 16) | h2) >>> 0;
+  const lo = ((h1 << 16) | h0) >>> 0;
+  return hi.toString(16).padStart(8, '0') + lo.toString(16).padStart(8, '0');
+}
+
 /** Canonical 64-bit hash of any plain-data state value. */
 export function hashState(state: unknown): string {
   return fnv1a64Hex(canonicalStringify(state));

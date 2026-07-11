@@ -24,3 +24,15 @@ export function playerId(value: number): PlayerId {
   assertId(value, 'PlayerId');
   return value as PlayerId;
 }
+
+/**
+ * Index of a tile in the map's typed arrays: `r * width + q` (doc 04 §4).
+ * Normally produced by map/hex.ts `toTileIndex(q, r, width)`; this raw
+ * constructor exists for deserialization and tests.
+ */
+export type TileIndex = Branded<'TileIndex'>;
+
+export function tileIndex(value: number): TileIndex {
+  assertId(value, 'TileIndex');
+  return value as TileIndex;
+}

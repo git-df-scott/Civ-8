@@ -10,8 +10,13 @@
 import type { Command } from '../commands/types';
 import type { SerializedState } from '../state/gameState';
 
-/** Bumped on any state-shape change. v0 is the first real save format. */
-export const SAVE_VERSION = 0;
+/**
+ * Bumped on any state-shape change.
+ *   v0 — M1: no map (snapshot.map: null).
+ *   v1 — M2: typed-array MapState in snapshot.map (serialize/migrations
+ *        migrateV0ToV1 regenerates the map from the seed).
+ */
+export const SAVE_VERSION = 1;
 
 /**
  * The engine's own version, recorded in saves for forensics only (loads never

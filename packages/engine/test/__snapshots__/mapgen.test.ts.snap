@@ -1,0 +1,328 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`mapgen pipeline > per-stage output fingerprints are stable (seed 1, duel) 1`] = `
+[
+  [
+    "landmass",
+    {
+      "elevation": "3882fe847adf30a5",
+      "feature": "3882fe847adf30a5",
+      "landMask": "f20498ca91b729aa",
+      "moisture": "3882fe847adf30a5",
+      "resource": "3882fe847adf30a5",
+      "riverEdges": "3882fe847adf30a5",
+      "temperature": "3882fe847adf30a5",
+      "terrain": "e924b0c67562f064",
+    },
+  ],
+  [
+    "elevation",
+    {
+      "elevation": "989fab6eeae1f048",
+      "feature": "3882fe847adf30a5",
+      "landMask": "f20498ca91b729aa",
+      "moisture": "3882fe847adf30a5",
+      "resource": "3882fe847adf30a5",
+      "riverEdges": "3882fe847adf30a5",
+      "temperature": "3882fe847adf30a5",
+      "terrain": "e924b0c67562f064",
+    },
+  ],
+  [
+    "climate",
+    {
+      "elevation": "989fab6eeae1f048",
+      "feature": "3882fe847adf30a5",
+      "landMask": "f20498ca91b729aa",
+      "moisture": "60cc7cbc31e45407",
+      "resource": "3882fe847adf30a5",
+      "riverEdges": "3882fe847adf30a5",
+      "temperature": "60e1b9f2de5e6108",
+      "terrain": "e924b0c67562f064",
+    },
+  ],
+  [
+    "biomes",
+    {
+      "elevation": "989fab6eeae1f048",
+      "feature": "3882fe847adf30a5",
+      "landMask": "f20498ca91b729aa",
+      "moisture": "60cc7cbc31e45407",
+      "resource": "3882fe847adf30a5",
+      "riverEdges": "3882fe847adf30a5",
+      "temperature": "60e1b9f2de5e6108",
+      "terrain": "f29aee7f2b27b6fb",
+    },
+  ],
+  [
+    "rivers",
+    {
+      "elevation": "1f0fc5a9c61e4233",
+      "feature": "3882fe847adf30a5",
+      "landMask": "7e2f80a1f5635f43",
+      "moisture": "60cc7cbc31e45407",
+      "resource": "3882fe847adf30a5",
+      "riverEdges": "bd5d384fed4797af",
+      "temperature": "60e1b9f2de5e6108",
+      "terrain": "f43aa5d3809005ea",
+    },
+  ],
+  [
+    "features",
+    {
+      "elevation": "1f0fc5a9c61e4233",
+      "feature": "ed02c385f8418075",
+      "landMask": "7e2f80a1f5635f43",
+      "moisture": "60cc7cbc31e45407",
+      "resource": "3882fe847adf30a5",
+      "riverEdges": "bd5d384fed4797af",
+      "temperature": "60e1b9f2de5e6108",
+      "terrain": "f43aa5d3809005ea",
+    },
+  ],
+  [
+    "resources",
+    {
+      "elevation": "1f0fc5a9c61e4233",
+      "feature": "ed02c385f8418075",
+      "landMask": "7e2f80a1f5635f43",
+      "moisture": "60cc7cbc31e45407",
+      "resource": "a287f89e44fa1929",
+      "riverEdges": "bd5d384fed4797af",
+      "temperature": "60e1b9f2de5e6108",
+      "terrain": "f43aa5d3809005ea",
+    },
+  ],
+  [
+    "validate",
+    {
+      "elevation": "1f0fc5a9c61e4233",
+      "feature": "ed02c385f8418075",
+      "landMask": "7e2f80a1f5635f43",
+      "moisture": "60cc7cbc31e45407",
+      "resource": "a287f89e44fa1929",
+      "riverEdges": "bd5d384fed4797af",
+      "temperature": "60e1b9f2de5e6108",
+      "terrain": "f43aa5d3809005ea",
+    },
+  ],
+]
+`;
+
+exports[`mapgen pipeline > per-stage output fingerprints are stable (seed 7, duel) 1`] = `
+[
+  [
+    "landmass",
+    {
+      "elevation": "3882fe847adf30a5",
+      "feature": "3882fe847adf30a5",
+      "landMask": "1224f49524dc0638",
+      "moisture": "3882fe847adf30a5",
+      "resource": "3882fe847adf30a5",
+      "riverEdges": "3882fe847adf30a5",
+      "temperature": "3882fe847adf30a5",
+      "terrain": "da0e62d0d5aadb5a",
+    },
+  ],
+  [
+    "elevation",
+    {
+      "elevation": "9076b9ab2b9f3de1",
+      "feature": "3882fe847adf30a5",
+      "landMask": "1224f49524dc0638",
+      "moisture": "3882fe847adf30a5",
+      "resource": "3882fe847adf30a5",
+      "riverEdges": "3882fe847adf30a5",
+      "temperature": "3882fe847adf30a5",
+      "terrain": "da0e62d0d5aadb5a",
+    },
+  ],
+  [
+    "climate",
+    {
+      "elevation": "9076b9ab2b9f3de1",
+      "feature": "3882fe847adf30a5",
+      "landMask": "1224f49524dc0638",
+      "moisture": "b5515d0780e2f531",
+      "resource": "3882fe847adf30a5",
+      "riverEdges": "3882fe847adf30a5",
+      "temperature": "45214571749e86b4",
+      "terrain": "da0e62d0d5aadb5a",
+    },
+  ],
+  [
+    "biomes",
+    {
+      "elevation": "9076b9ab2b9f3de1",
+      "feature": "3882fe847adf30a5",
+      "landMask": "1224f49524dc0638",
+      "moisture": "b5515d0780e2f531",
+      "resource": "3882fe847adf30a5",
+      "riverEdges": "3882fe847adf30a5",
+      "temperature": "45214571749e86b4",
+      "terrain": "a519061f943fea11",
+    },
+  ],
+  [
+    "rivers",
+    {
+      "elevation": "24ad1b024855e8f3",
+      "feature": "3882fe847adf30a5",
+      "landMask": "76239c2974f9e3fb",
+      "moisture": "b5515d0780e2f531",
+      "resource": "3882fe847adf30a5",
+      "riverEdges": "391e920b3578004c",
+      "temperature": "45214571749e86b4",
+      "terrain": "c2baf791668427af",
+    },
+  ],
+  [
+    "features",
+    {
+      "elevation": "24ad1b024855e8f3",
+      "feature": "b0dac240c6262c96",
+      "landMask": "76239c2974f9e3fb",
+      "moisture": "b5515d0780e2f531",
+      "resource": "3882fe847adf30a5",
+      "riverEdges": "391e920b3578004c",
+      "temperature": "45214571749e86b4",
+      "terrain": "c2baf791668427af",
+    },
+  ],
+  [
+    "resources",
+    {
+      "elevation": "24ad1b024855e8f3",
+      "feature": "b0dac240c6262c96",
+      "landMask": "76239c2974f9e3fb",
+      "moisture": "b5515d0780e2f531",
+      "resource": "d61bd22369eddd83",
+      "riverEdges": "391e920b3578004c",
+      "temperature": "45214571749e86b4",
+      "terrain": "c2baf791668427af",
+    },
+  ],
+  [
+    "validate",
+    {
+      "elevation": "24ad1b024855e8f3",
+      "feature": "b0dac240c6262c96",
+      "landMask": "76239c2974f9e3fb",
+      "moisture": "b5515d0780e2f531",
+      "resource": "d61bd22369eddd83",
+      "riverEdges": "391e920b3578004c",
+      "temperature": "45214571749e86b4",
+      "terrain": "c2baf791668427af",
+    },
+  ],
+]
+`;
+
+exports[`mapgen pipeline > per-stage output fingerprints are stable (seed 42, duel) 1`] = `
+[
+  [
+    "landmass",
+    {
+      "elevation": "3882fe847adf30a5",
+      "feature": "3882fe847adf30a5",
+      "landMask": "ba9ce206aecde380",
+      "moisture": "3882fe847adf30a5",
+      "resource": "3882fe847adf30a5",
+      "riverEdges": "3882fe847adf30a5",
+      "temperature": "3882fe847adf30a5",
+      "terrain": "7be71fa2b6ec9262",
+    },
+  ],
+  [
+    "elevation",
+    {
+      "elevation": "de6d85874b9128bb",
+      "feature": "3882fe847adf30a5",
+      "landMask": "ba9ce206aecde380",
+      "moisture": "3882fe847adf30a5",
+      "resource": "3882fe847adf30a5",
+      "riverEdges": "3882fe847adf30a5",
+      "temperature": "3882fe847adf30a5",
+      "terrain": "7be71fa2b6ec9262",
+    },
+  ],
+  [
+    "climate",
+    {
+      "elevation": "de6d85874b9128bb",
+      "feature": "3882fe847adf30a5",
+      "landMask": "ba9ce206aecde380",
+      "moisture": "5b521b4fd4214fa4",
+      "resource": "3882fe847adf30a5",
+      "riverEdges": "3882fe847adf30a5",
+      "temperature": "878540035452019a",
+      "terrain": "7be71fa2b6ec9262",
+    },
+  ],
+  [
+    "biomes",
+    {
+      "elevation": "de6d85874b9128bb",
+      "feature": "3882fe847adf30a5",
+      "landMask": "ba9ce206aecde380",
+      "moisture": "5b521b4fd4214fa4",
+      "resource": "3882fe847adf30a5",
+      "riverEdges": "3882fe847adf30a5",
+      "temperature": "878540035452019a",
+      "terrain": "601fb9179e063640",
+    },
+  ],
+  [
+    "rivers",
+    {
+      "elevation": "8629e703de45b44b",
+      "feature": "3882fe847adf30a5",
+      "landMask": "0b87a2ed48f302e4",
+      "moisture": "5b521b4fd4214fa4",
+      "resource": "3882fe847adf30a5",
+      "riverEdges": "a021ffbd81e3999f",
+      "temperature": "878540035452019a",
+      "terrain": "01757a22c06142e3",
+    },
+  ],
+  [
+    "features",
+    {
+      "elevation": "8629e703de45b44b",
+      "feature": "4ed6cffd2f076a02",
+      "landMask": "0b87a2ed48f302e4",
+      "moisture": "5b521b4fd4214fa4",
+      "resource": "3882fe847adf30a5",
+      "riverEdges": "a021ffbd81e3999f",
+      "temperature": "878540035452019a",
+      "terrain": "01757a22c06142e3",
+    },
+  ],
+  [
+    "resources",
+    {
+      "elevation": "8629e703de45b44b",
+      "feature": "4ed6cffd2f076a02",
+      "landMask": "0b87a2ed48f302e4",
+      "moisture": "5b521b4fd4214fa4",
+      "resource": "14c68688f395ac45",
+      "riverEdges": "a021ffbd81e3999f",
+      "temperature": "878540035452019a",
+      "terrain": "01757a22c06142e3",
+    },
+  ],
+  [
+    "validate",
+    {
+      "elevation": "8629e703de45b44b",
+      "feature": "4ed6cffd2f076a02",
+      "landMask": "0b87a2ed48f302e4",
+      "moisture": "5b521b4fd4214fa4",
+      "resource": "14c68688f395ac45",
+      "riverEdges": "a021ffbd81e3999f",
+      "temperature": "878540035452019a",
+      "terrain": "01757a22c06142e3",
+    },
+  ],
+]
+`;

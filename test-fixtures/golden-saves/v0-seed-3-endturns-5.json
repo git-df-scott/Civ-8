@@ -1,0 +1,69 @@
+{
+  "saveVersion": 0,
+  "engineVersion": "0.0.0",
+  "contentHash": "content:none",
+  "seed": 3,
+  "snapshot": {
+    "turn": 2,
+    "phase": "playing",
+    "activePlayer": 1,
+    "seed": 3,
+    "rng": {
+      "turn": {
+        "stateHi": 3272691351,
+        "stateLo": 43855370,
+        "incHi": 1765877117,
+        "incLo": 992547421
+      }
+    },
+    "players": [
+      [
+        0,
+        {
+          "id": 0,
+          "name": "Player 1"
+        }
+      ],
+      [
+        1,
+        {
+          "id": 1,
+          "name": "Player 2"
+        }
+      ]
+    ],
+    "map": null,
+    "units": null,
+    "cities": null,
+    "nextIds": {
+      "player": 2,
+      "unit": 0,
+      "city": 0
+    },
+    "lastTurnDraw": 2076690493
+  },
+  "commandLog": [
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    },
+    {
+      "type": "EndTurn"
+    }
+  ],
+  "turnHashes": [
+    "513a928dc5337a99",
+    "060ac0b4f27e7373",
+    "e2ada7db728c52b4",
+    "0c62c68347696fde",
+    "4b07a3017bb8365a"
+  ]
+}
